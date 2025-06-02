@@ -128,3 +128,22 @@ export const deletePost = async (req, res) => {
 			.json({ message: "Error deleting post", error: error.message });
 	}
 };
+
+// toggle post publication status
+export const togglePostPublication = async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        post.isPublished = !post.isPublished; // Toggle the publication status
+        await post.save();
+
+        res.status(200).json({ message: "Post publication status updated", post });
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Error updating post publication status", error: error.message });
+    }
+};
