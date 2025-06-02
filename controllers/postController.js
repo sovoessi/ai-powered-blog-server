@@ -35,6 +35,21 @@ export const getPostsByUserId = async (req, res) => {
     }
 };
 
+// Get recent posts
+export const getRecentPosts = async (req, res) => {
+    try {
+        const posts = await Post.find({ isPublished: true })
+            .sort({ createdAt: -1 }) // Sort by creation date, most recent first
+            .limit(5) // Limit to 5 recent posts
+            .populate("author", "username email");
+        res.status(200).json(posts);
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Error fetching recent posts", error: error.message });
+    }
+};
+
 // Function to create a new post
 export const createPost = async (req, res) => {
 	try {
