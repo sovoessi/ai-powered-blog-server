@@ -7,7 +7,7 @@ import {imagekit} from "../config/imageKit.js"; // Assuming you have configured 
 // Function to get all posts
 export const getAllPosts = async (req, res) => {
 	try {
-		const posts = await Post.find().populate("author", "username email");
+		const posts = await Post.find({isPublished: true}).populate("author", "username email");
 		res.status(200).json(posts);
 	} catch (error) {
 		res

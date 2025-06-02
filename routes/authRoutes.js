@@ -8,7 +8,7 @@ router.post("/register", register);
 // Login route
 router.post("/login", login);
 // Logout route
-router.post("/logout", logout);
+router.get("/logout", logout);
 
 // Export the router
 export default router;
