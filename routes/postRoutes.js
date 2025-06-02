@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getAllPosts, createPost, getPostById, updatePost, deletePost } from '../controllers/postController.js';
+import { getAllPosts, createPost, getPostById, updatePost, deletePost, togglePostPublication, getPostsByUserId } from '../controllers/postController.js';
 
 import { authenticate } from '../middlewares/authMiddleware.js';
 import  {upload}  from '../middlewares/uploadMiddleware.js';
@@ -13,10 +13,15 @@ router
 	.get(getAllPosts)
 	.post(authenticate, upload.single("image"), createPost);
 
+// Get Posts by user ID
+router.route('/user/:userId')
+    .get(getPostsByUserId);
+
 // Route to get a post by ID
 router.route('/:id')
     .get(getPostById)
     .put(authenticate, updatePost)
+    .post(authenticate, togglePostPublication)
     .delete(authenticate, deletePost);
     
 

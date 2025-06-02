@@ -7,7 +7,7 @@ import { imagekit } from "../config/imageKit.js"; // Assuming you have configure
 // Function to get all posts
 export const getAllPosts = async (req, res) => {
 	try {
-		const posts = await Post.find({ isPublished: true }).populate(
+		const posts = await Post.find({ isPublished: false }).populate(
 			"author",
 			"username email"
 		);
@@ -17,6 +17,22 @@ export const getAllPosts = async (req, res) => {
 			.status(500)
 			.json({ message: "Error fetching posts", error: error.message });
 	}
+};
+
+// Function to get posts by user ID
+export const getPostsByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const posts = await Post.find({ author: userId }).populate(
+            "author",
+            "username email"
+        );
+        res.status(200).json(posts);
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: "Error fetching posts by user", error: error.message });
+    }
 };
 
 // Function to create a new post
