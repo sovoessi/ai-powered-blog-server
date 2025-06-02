@@ -19,6 +19,7 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("uploads")); // Serve static files from the uploads directory
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Blog API");

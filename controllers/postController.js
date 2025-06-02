@@ -2,12 +2,15 @@ import Post from "../models/Post.js";
 import fs from "fs";
 import path from "path";
 
-import {imagekit} from "../config/imageKit.js"; // Assuming you have configured ImageKit or similar service
+import { imagekit } from "../config/imageKit.js"; // Assuming you have configured ImageKit or similar service
 
 // Function to get all posts
 export const getAllPosts = async (req, res) => {
 	try {
-		const posts = await Post.find({isPublished: true}).populate("author", "username email");
+		const posts = await Post.find({ isPublished: true }).populate(
+			"author",
+			"username email"
+		);
 		res.status(200).json(posts);
 	} catch (error) {
 		res
@@ -20,31 +23,34 @@ export const getAllPosts = async (req, res) => {
 export const createPost = async (req, res) => {
 	try {
 		const { title, description, category } = req.body;
-		const author = req.user._id; // Assuming user is authenticated and user info is in req.user
+		const author = req.user.userId; // Assuming user is authenticated and user info is in req.user
 
 		const imageFile = req.file ? req.file.path : null; // Assuming file upload middleware is used
 
-		const fileBuffer = imageFile
-			? fs.readFileSync(path.join(__dirname, "..", "..", imageFile))
-			: null;
-		if (image && !fileBuffer) {
+		const fileBuffer = imageFile ? fs.readFileSync(imageFile) : null;
+
+		if (imageFile && !fileBuffer) {
 			return res.status(400).json({ message: "Image file not found" });
 		}
 
 		// If using ImageKit or similar service, you can upload the image here
 		const response = await imagekit.upload({
 			file: fileBuffer, // Buffer of the image file
-			fileName: path.basename(image), // Name of the file
+			fileName: path.basename(imageFile), // Name of the file
 			folder: "blog_posts", // Optional folder in ImageKit
 		});
 
+		if (imageFile) {
+			fs.unlinkSync(imageFile); // Remove local file after upload
+		}
+
 		// optimization through imagekit
-		const optimizedImageURL = imagekit.url({
+		const optimizedImageURL = await imagekit.url({
 			path: response.filePath, // Path returned by ImageKit
 			transformation: [
 				{
 					width: 1280, // Desired width
-					format: webp,
+					format: "webp",
 					quality: "auto", // Auto quality
 				},
 			],

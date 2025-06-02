@@ -8,9 +8,10 @@ import  {upload}  from '../middlewares/uploadMiddleware.js';
 const router = express.Router();
 
 // Route to get all posts
-router.route('/')
-    .get(getAllPosts)
-    .post(authenticate,upload.single('image'), createPost);
+router
+	.route("/")
+	.get(getAllPosts)
+	.post(authenticate, upload.single("image"), createPost);
 
 // Route to get a post by ID
 router.route('/:id')

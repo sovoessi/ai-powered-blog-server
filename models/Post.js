@@ -16,7 +16,7 @@ const postSchema = mongoose.Schema(
         category: {
             type: String,
             required: [true, "Please provide a category"],
-            enum: ["Technology", "Health", "Lifestyle", "Education", "Travel"],
+            enum: ["Technology","Business", "Health", "Lifestyle", "Education", "Travel"],
         },
         image: {
             type: String,
