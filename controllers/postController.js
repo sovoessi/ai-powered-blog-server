@@ -185,7 +185,7 @@ export const generateContent = async (req, res) => {
 		const { prompt } = req.body;
 
 		// Assuming you have a function to generate content using Gemini or similar service
-		const generatedContent = await main(prompt + ' Generate a blog content for this topic in simple text format'); // Replace with your content generation logic
+		const generatedContent = await main(prompt + ' Generate a blog content 145 words for this topic in simple text format'); // Replace with your content generation logic
 
 		res.status(200).json({ content: generatedContent });
 	} catch (error) {
