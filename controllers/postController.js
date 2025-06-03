@@ -1,6 +1,7 @@
 import Post from "../models/Post.js";
 import fs from "fs";
 import path from "path";
+import main from "../config/gemini.js"; // Assuming you have a function to generate content using Gemini or similar service
 
 import { imagekit } from "../config/imageKit.js"; // Assuming you have configured ImageKit or similar service
 
@@ -178,3 +179,18 @@ export const togglePostPublication = async (req, res) => {
             .json({ message: "Error updating post publication status", error: error.message });
     }
 };
+
+export const generateContent = async (req, res) => {
+	try {
+		const { prompt } = req.body;
+
+		// Assuming you have a function to generate content using Gemini or similar service
+		const generatedContent = await main(prompt + ' Generate a blog content for this topic in simple text format'); // Replace with your content generation logic
+
+		res.status(200).json({ content: generatedContent });
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: "Error generating content", error: error.message });
+	}
+}
