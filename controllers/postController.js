@@ -1,6 +1,6 @@
 import Post from "../models/Post.js";
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 import main from "../config/gemini.js"; // Assuming you have a function to generate content using Gemini or similar service
 
 import { imagekit } from "../config/imageKit.js"; // Assuming you have configured ImageKit or similar service
@@ -52,43 +52,89 @@ export const getRecentPosts = async (req, res) => {
 };
 
 // Function to create a new post
+// export const createPost = async (req, res) => {
+// 	try {
+// 		const { title, description, category } = req.body;
+// 		const author = req.user.userId; // Assuming user is authenticated and user info is in req.user
+
+// 		const imageFile = req.file ? req.file.path : null; // Assuming file upload middleware is used
+
+// 		const fileBuffer = imageFile ? fs.readFileSync(imageFile) : null;
+
+// 		if (imageFile && !fileBuffer) {
+// 			return res.status(400).json({ message: "Image file not found" });
+// 		}
+
+// 		// If using ImageKit or similar service, you can upload the image here
+// 		const response = await imagekit.upload({
+// 			file: fileBuffer, // Buffer of the image file
+// 			fileName: path.basename(imageFile), // Name of the file
+// 			folder: "blog_posts", // Optional folder in ImageKit
+// 		});
+
+// 		if (imageFile) {
+// 			fs.unlinkSync(imageFile); // Remove local file after upload
+// 		}
+
+// 		// optimization through imagekit
+// 		const optimizedImageURL = await imagekit.url({
+// 			path: response.filePath, // Path returned by ImageKit
+// 			transformation: [
+// 				{
+// 					width: 1280, // Desired width
+// 					format: "webp",
+// 					quality: "auto", // Auto quality
+// 				},
+// 			],
+// 		});
+
+// 		const image = optimizedImageURL; // Use the optimized image URL
+
+// 		const newPost = new Post({
+// 			title,
+// 			description,
+// 			category,
+// 			image,
+// 			author,
+// 		});
+
+// 		await newPost.save();
+// 		res.status(201).json(newPost);
+// 	} catch (error) {
+// 		res
+// 			.status(500)
+// 			.json({ message: "Error creating post", error: error.message });
+// 	}
+// };
+
+
 export const createPost = async (req, res) => {
 	try {
 		const { title, description, category } = req.body;
-		const author = req.user.userId; // Assuming user is authenticated and user info is in req.user
+		const author = req.user.userId;
 
-		const imageFile = req.file ? req.file.path : null; // Assuming file upload middleware is used
+		let image = null;
 
-		const fileBuffer = imageFile ? fs.readFileSync(imageFile) : null;
+		if (req.file && req.file.buffer) {
+			// Upload directly from buffer to ImageKit
+			const response = await imagekit.upload({
+				file: req.file.buffer,
+				fileName: req.file.originalname,
+				folder: "blog_posts",
+			});
 
-		if (imageFile && !fileBuffer) {
-			return res.status(400).json({ message: "Image file not found" });
+			// Get optimized image URL
+			image = imagekit.url({
+				path: response.filePath,
+				transformation: [
+					{
+						width: 1280,
+						format: "webp",
+						quality: "auto",
+					},
+				],
+			});
 		}
-
-		// If using ImageKit or similar service, you can upload the image here
-		const response = await imagekit.upload({
-			file: fileBuffer, // Buffer of the image file
-			fileName: path.basename(imageFile), // Name of the file
-			folder: "blog_posts", // Optional folder in ImageKit
-		});
-
-		if (imageFile) {
-			fs.unlinkSync(imageFile); // Remove local file after upload
-		}
-
-		// optimization through imagekit
-		const optimizedImageURL = await imagekit.url({
-			path: response.filePath, // Path returned by ImageKit
-			transformation: [
-				{
-					width: 1280, // Desired width
-					format: "webp",
-					quality: "auto", // Auto quality
-				},
-			],
-		});
-
-		const image = optimizedImageURL; // Use the optimized image URL
 
 		const newPost = new Post({
 			title,
@@ -106,6 +152,7 @@ export const createPost = async (req, res) => {
 			.json({ message: "Error creating post", error: error.message });
 	}
 };
+
 
 // Function to get a post by ID
 export const getPostById = async (req, res) => {
