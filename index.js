@@ -19,7 +19,9 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("./public")); // Serve static files from the uploads directory
+
+// Remove express.static for serverless
+// app.use(express.static("public"));
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Blog API");
@@ -28,17 +30,27 @@ app.get("/", (req, res) => {
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/posts', postRoutes);
 
-
-const startServer = async () => {
+// Connect to DB once (outside handler)
+let isConnected = false;
+async function ensureDB() {
+    if (!isConnected) {
+        await connectDB();
+        isConnected = true;
+    }
+}
+// Middleware to ensure DB connection before handling requests
+app.use(async (req, res, next) => {
 	try {
-		await connectDB();
-		app.listen(PORT, () => {
-			console.log(`🚀 Server is running on port ${PORT}`);
-		});
+		await ensureDB();
+		next();
 	} catch (error) {
-		console.error("Error starting server:", error.message);
-		process.exit(1); // Exit the process with failure
+		console.error("Database connection error:", error);
+		res.status(500).json({ message: "Internal Server Error" });
 	}
-};
+});
 
-startServer();
+// Export handler for Vercel
+export default async function handler(req, res) {
+    await ensureDB();
+    app(req, res);
+}
